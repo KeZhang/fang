@@ -13,7 +13,8 @@
     "csvtojson": "^2.0.10",
     "element-ui": "^2.14.1",
     "json2csv": "^5.0.5",
-    "nuxt": "^2.14.6"
+    "nuxt": "^2.14.6",
+    "puppeteer": "^5.5.0"
   },
   "devDependencies": {}
 }
