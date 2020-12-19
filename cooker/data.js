@@ -55,7 +55,7 @@ const cook2 = () => {
   roomList.forEach((d) => {
 
     d.zh = d.ld.match(new RegExp('^春月金沙府([0-9]+)幢'))[1] + '幢'
-    d.isHomeless = homeList.findIndex((h) => {
+    d.isRoomless = homeList.findIndex((h) => {
       return h.zh == d.zh && h.fh == d.fh;
     }) > -1;
     d.jjtn = Math.round(d.zj / d.tnmj).toFixed(0)
@@ -64,19 +64,21 @@ const cook2 = () => {
   })
 
   // console.table(roomList)
-  console.log("homeless : " + roomList.filter(r => r.isHomeless).length)
+  console.log("homeless : " + roomList.filter(r => r.isRoomless).length)
   console.log("total    : " + roomList.length)
   return roomList;
 }
 
 const cook3 = () => {
   const myData = cook2().map((d) => {
+    const dfl = parseInt(100 * d.tnmj / d.jzmj) + '%'
     return {
       "楼栋": d.ld,
       "房号": d.fh,
-      "幢号": d.zh ,
+      "幢号": d.zh,
       "套内面积": d.tnmj,
       "建筑面积": d.jzmj,
+      "得房率": dfl,
       "楼层": d.ce + '层',
       "用途": d.yt,
       "总价": d.zj,
@@ -84,8 +86,8 @@ const cook3 = () => {
       "销售状态": d.zt,
       "均价套内": d.jjtn,
       "均价建筑": d.jjjz,
-      "无房户": d.isHomeless ? '是' : '否',
-      isHomeless: d.isHomeless,
+      "无房户": d.isRoomless ? '是' : '否',
+      isRoomless: d.isRoomless,
     }
   });
 

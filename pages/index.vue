@@ -9,13 +9,35 @@
     </el-col>
     <el-col>
       <el-row>
-        <el-col :span="6">
+        <el-col :span="4">
           <el-tag style="margin-right: 5rem"
             >Total ( {{ tableData.length }} / {{ rawData.length }} )</el-tag
           >
         </el-col>
-        <el-col :offset="8" :span="2">
-          <el-checkbox v-model="isHomelessCheck" border>无房户</el-checkbox>
+        <el-col :offset="2" :span="2">
+          <el-select v-model="filterZH" placeholder="幢号">
+            <el-option
+              v-for="item in viewZHValueList"
+              :key="item.label"
+              :label="item.label"
+              :value="item.key"
+            >
+            </el-option>
+          </el-select>
+        </el-col>
+        <el-col :offset="1" :span="2">
+          <el-select v-model="filterDFL" placeholder="得房率">
+            <el-option
+              v-for="item in viewDFLValueList"
+              :key="item.label"
+              :label="item.label"
+              :value="item.key"
+            >
+            </el-option>
+          </el-select>
+        </el-col>
+        <el-col :offset="1" :span="2">
+          <el-checkbox v-model="isRoomlessCheck" border>无房户</el-checkbox>
         </el-col>
         <el-col :offset="2" :span="6">
           <el-checkbox-group v-model="filterHx" size="medium">
@@ -40,25 +62,29 @@
     >
       <el-table-column prop="幢号" label="幢号" width="50"> </el-table-column>
       <el-table-column prop="房号" label="房号" width="80"> </el-table-column>
-      <el-table-column prop="套内面积" label="套内面积"  width="120" sortable>
+      <el-table-column prop="楼层" label="楼层" width="80" sortable>
       </el-table-column>
-      <el-table-column prop="建筑面积" label="建筑面积" width="120"  sortable>
-      </el-table-column>
-      <el-table-column prop="楼层" label="楼层"  width="80"  sortable> </el-table-column>
       <el-table-column prop="总价" label="总价" sortable> </el-table-column>
       <el-table-column prop="均价套内" label="均价套内" sortable>
       </el-table-column>
       <el-table-column prop="均价建筑" label="均价建筑" sortable>
       </el-table-column>
+      <el-table-column prop="得房率" label="得房率" width="100" sortable>
+      </el-table-column>
+      <el-table-column prop="套内面积" label="套内面积" width="120" sortable>
+      </el-table-column>
+      <el-table-column prop="建筑面积" label="建筑面积" width="120" sortable>
+      </el-table-column>
       <el-table-column prop="户型" label="户型" sortable> </el-table-column>
       <el-table-column prop="无房户" label="无房户" width="100" sortable>
         <template slot-scope="scope">
-          <el-tag :type="!scope.row.isHomeless ? 'primary' : 'success'">{{
+          <el-tag :type="!scope.row.isRoomless ? 'primary' : 'success'">{{
             scope.row["无房户"]
           }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="楼栋" label="楼栋" min-width="100"> </el-table-column>
+      <el-table-column prop="楼栋" label="楼栋" min-width="100">
+      </el-table-column>
     </el-table>
   </el-row>
 </template>
@@ -66,22 +92,47 @@
 <script>
 import rawData from "../cooker/data/result.json";
 
+const getValues = (list, props) => {
+  let ret = [];
+  ret = list.map((d) => d[props]);
+  return [""].concat(Array.from(new Set(ret))).map((d) => {
+    return {
+      key: d,
+      label: d || props,
+    };
+  });
+};
+const viewDFLValueList = getValues(rawData, "得房率");
+const viewZHValueList = getValues(rawData, "幢号");
+
 export default {
   data() {
     const viewHxList = ["4室2厅1厨2卫", "3室2厅1厨2卫"];
     return {
+      viewDFLValueList,
+      viewZHValueList,
       viewHxList,
       rawData,
       filterText: "",
+      filterZH: "",
+      filterDFL: "",
       filterHx: [].concat(viewHxList),
-      isHomelessCheck: false,
+      isRoomlessCheck: false,
     };
   },
   computed: {
     tableData: function () {
       return this.rawData
         .filter((d) => {
-          return this.isHomelessCheck ? d.isHomeless : true;
+          return this.isRoomlessCheck ? d.isRoomless : true;
+        })
+        .filter((d) => {
+          // return this.filterZH === "all" || this.filterZH === d["幢号"];
+          return !this.filterZH || this.filterZH === d["幢号"];
+        })
+        .filter((d) => {
+          // return this.filterDFL === "all" || this.filterDFL === d["得房率"];
+          return !this.filterDFL || this.filterDFL === d["得房率"];
         })
         .filter((d) => {
           return this.filterHx.includes(d["户型"]);
