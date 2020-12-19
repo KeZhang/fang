@@ -8,14 +8,21 @@
       ></el-input>
     </el-col>
     <el-col>
-      <el-tag style="margin-right: 5rem;">Total ( {{ tableData.length }} / {{ rawData.length }} )</el-tag>
+      <el-tag style="margin-right: 5rem"
+        >Total ( {{ tableData.length }} / {{ rawData.length }} )</el-tag
+      >
 
       <el-checkbox v-model="isHomelessCheck">无房户</el-checkbox>
     </el-col>
-    <el-col :span="4">
-    </el-col>
+    <el-col :span="4"> </el-col>
     <!-- <el-button @click="clearFilter">清除所有过滤器</el-button> -->
-    <el-table ref="filterTable" :data="tableData" style="width: 100%">
+    <el-table
+      border
+      cell-class-name="mycell"
+      ref="filterTable"
+      :data="tableData"
+      style="width: 100%"
+    >
       <el-table-column prop="楼栋" label="楼栋" width="180"> </el-table-column>
       <!-- <el-table-column prop="幢号" label="幢号" width="50"> </el-table-column> -->
       <el-table-column prop="房号" label="房号" width="80"> </el-table-column>
@@ -75,17 +82,19 @@ export default {
   computed: {
     tableData: function () {
       return this.rawData
-      .filter((d)=>{
-        return this.isHomelessCheck ? d.isHomeless : true;
-      })
-      .filter((d) => {
-        const regtxt = this.filterText.replace(/\\/gi, "");
-        const summaryStr = [d["楼栋"], d["无房户"], d["户型"], d["楼层"]].join(
-          " "
-        );
-        return !this.filterText || new RegExp(regtxt, "i").test(summaryStr);
-      })
-      ;
+        .filter((d) => {
+          return this.isHomelessCheck ? d.isHomeless : true;
+        })
+        .filter((d) => {
+          const regtxt = this.filterText.replace(/\\/gi, "");
+          const summaryStr = [
+            d["楼栋"],
+            d["无房户"],
+            d["户型"],
+            d["楼层"],
+          ].join(" ");
+          return !this.filterText || new RegExp(regtxt, "i").test(summaryStr);
+        });
     },
   },
   methods: {
@@ -109,6 +118,18 @@ export default {
 
 <style>
 .container {
-  margin: 5rem;
+  margin: 2rem;
+}
+.container .el-col {
+  padding: .5rem 0;
+}
+.mycell .cell {
+  padding: 0 .5rem;
+}
+
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (-webkit-min-device-pixel-ratio: 2) {
+  .container {
+    margin: 1rem;
+  }
 }
 </style>
