@@ -38,14 +38,13 @@
       :data="tableData"
       style="width: 100%"
     >
-      <el-table-column prop="楼栋" label="楼栋" width="180"> </el-table-column>
-      <!-- <el-table-column prop="幢号" label="幢号" width="50"> </el-table-column> -->
+      <el-table-column prop="幢号" label="幢号" width="50"> </el-table-column>
       <el-table-column prop="房号" label="房号" width="80"> </el-table-column>
-      <el-table-column prop="套内面积" label="套内面积" sortable>
+      <el-table-column prop="套内面积" label="套内面积"  width="120" sortable>
       </el-table-column>
-      <el-table-column prop="建筑面积" label="建筑面积" sortable>
+      <el-table-column prop="建筑面积" label="建筑面积" width="120"  sortable>
       </el-table-column>
-      <el-table-column prop="楼层" label="楼层" sortable> </el-table-column>
+      <el-table-column prop="楼层" label="楼层"  width="80"  sortable> </el-table-column>
       <el-table-column prop="总价" label="总价" sortable> </el-table-column>
       <el-table-column prop="均价套内" label="均价套内" sortable>
       </el-table-column>
@@ -59,6 +58,7 @@
           }}</el-tag>
         </template>
       </el-table-column>
+      <el-table-column prop="楼栋" label="楼栋" min-width="100"> </el-table-column>
     </el-table>
   </el-row>
 </template>
