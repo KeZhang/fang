@@ -14,8 +14,16 @@
             >Total ( {{ tableData.length }} / {{ rawData.length }} )</el-tag
           >
         </el-col>
-        <el-col :offset="4" :span="2">
-          <el-select class="fgroup1" v-model="filterZH" placeholder="幢号">
+        <el-col :offset="2" :span="4">
+          <el-checkbox-group v-model="filterZH" size="mini">
+            <el-checkbox-button
+              v-for="zh in viewZHValueList"
+              :label="zh"
+              :key="zh"
+              >{{ zh }}</el-checkbox-button
+            >
+          </el-checkbox-group>
+          <!-- <el-select class="fgroup1" v-model="filterZH" placeholder="幢号">
             <el-option
               v-for="item in viewZHValueList"
               :key="item.label"
@@ -23,7 +31,7 @@
               :value="item.key"
             >
             </el-option>
-          </el-select>
+          </el-select> -->
         </el-col>
         <el-col :span="2">
           <el-select class="fgroup1" v-model="filterDFL" placeholder="得房率">
@@ -39,7 +47,7 @@
         <el-col :offset="1" :span="2">
           <el-checkbox v-model="isRoomlessCheck" border>无房户</el-checkbox>
         </el-col>
-        <el-col   :offset="1" :span="6">
+        <el-col :offset="1" :span="6">
           <el-checkbox-group v-model="filterHx" size="small">
             <el-checkbox-button
               v-for="hx in viewHxList"
@@ -103,7 +111,9 @@ const getValues = (list, props) => {
   });
 };
 const viewDFLValueList = getValues(rawData, "得房率");
-const viewZHValueList = getValues(rawData, "幢号");
+const viewZHValueList0 = getValues(rawData, "幢号");
+viewZHValueList0.shift();
+const viewZHValueList = viewZHValueList0.map((d) => d.key);
 
 export default {
   data() {
@@ -113,8 +123,9 @@ export default {
       viewZHValueList,
       viewHxList,
       rawData,
+      zhCheckAll: true,
       filterText: "",
-      filterZH: "",
+      filterZH: [].concat(viewZHValueList),
       filterDFL: "",
       filterHx: [].concat(viewHxList),
       isRoomlessCheck: false,
@@ -126,9 +137,11 @@ export default {
         .filter((d) => {
           return this.isRoomlessCheck ? d.isRoomless : true;
         })
+        // .filter((d) => {
+        //   return !this.filterZH || this.filterZH === d["幢号"];
+        // })
         .filter((d) => {
-          // return this.filterZH === "all" || this.filterZH === d["幢号"];
-          return !this.filterZH || this.filterZH === d["幢号"];
+          return this.filterZH.includes(d["幢号"]);
         })
         .filter((d) => {
           // return this.filterDFL === "all" || this.filterDFL === d["得房率"];
@@ -174,8 +187,8 @@ export default {
 .mycell .cell {
   padding: 0 0.5rem;
 }
-.fgroup1{
-  margin: 0 .25rem ;
+.fgroup1 {
+  margin: 0 0.25rem;
 }
 
 @media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (-webkit-min-device-pixel-ratio: 2) {
