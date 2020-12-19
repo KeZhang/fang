@@ -10,12 +10,12 @@
     <el-col>
       <el-row>
         <el-col :span="4">
-          <el-tag style="margin-right: 5rem"
+          <el-tag
             >Total ( {{ tableData.length }} / {{ rawData.length }} )</el-tag
           >
         </el-col>
-        <el-col :offset="2" :span="2">
-          <el-select v-model="filterZH" placeholder="幢号">
+        <el-col :offset="4" :span="2">
+          <el-select class="fgroup1" v-model="filterZH" placeholder="幢号">
             <el-option
               v-for="item in viewZHValueList"
               :key="item.label"
@@ -25,8 +25,8 @@
             </el-option>
           </el-select>
         </el-col>
-        <el-col :offset="1" :span="2">
-          <el-select v-model="filterDFL" placeholder="得房率">
+        <el-col :span="2">
+          <el-select class="fgroup1" v-model="filterDFL" placeholder="得房率">
             <el-option
               v-for="item in viewDFLValueList"
               :key="item.label"
@@ -39,8 +39,8 @@
         <el-col :offset="1" :span="2">
           <el-checkbox v-model="isRoomlessCheck" border>无房户</el-checkbox>
         </el-col>
-        <el-col :offset="2" :span="6">
-          <el-checkbox-group v-model="filterHx" size="medium">
+        <el-col   :offset="1" :span="6">
+          <el-checkbox-group v-model="filterHx" size="small">
             <el-checkbox-button
               v-for="hx in viewHxList"
               :label="hx"
@@ -139,12 +139,13 @@ export default {
         })
         .filter((d) => {
           const regtxt = this.filterText.replace(/\\/gi, "");
-          const summaryStr = [
-            d["楼栋"],
-            d["无房户"],
-            d["户型"],
-            d["楼层"],
-          ].join(" ");
+          // const summaryStr = [
+          //   d["楼栋"],
+          //   d["无房户"],
+          //   d["户型"],
+          //   d["楼层"],
+          // ].join(" ");
+          const summaryStr = Object.values(d).join(" ");
           return !this.filterText || new RegExp(regtxt, "i").test(summaryStr);
         });
     },
@@ -172,6 +173,9 @@ export default {
 }
 .mycell .cell {
   padding: 0 0.5rem;
+}
+.fgroup1{
+  margin: 0 .25rem ;
 }
 
 @media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (-webkit-min-device-pixel-ratio: 2) {
