@@ -74,10 +74,14 @@
       </el-col>
 
       <el-col class="bar-item" :offset="0" :span="6">
-        <el-row>
-          <el-col :span="18">
-            <el-badge :value="ceTip" class="item">
-              <el-select v-model="filterCE" multiple placeholder="楼层">
+        <el-switch
+              v-model="isCEInclude"
+              active-color="#13ce66"
+              inactive-color="#ff4949"
+            >
+            </el-switch>
+         <el-badge :value="ceTip" class="item-ceng">
+              <el-select size="small" v-model="filterCE" multiple placeholder="楼层">
                 <el-option
                   v-for="item in viewCEList"
                   :key="item.label"
@@ -87,16 +91,6 @@
                 </el-option>
               </el-select>
             </el-badge>
-          </el-col>
-          <el-col :span="3">
-            <el-switch
-              v-model="isCEInclude"
-              active-color="#13ce66"
-              inactive-color="#ff4949"
-            >
-            </el-switch>
-          </el-col>
-        </el-row>
       </el-col>
     </el-row>
     <el-table
