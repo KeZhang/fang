@@ -1,66 +1,64 @@
 <template>
-  <el-row class="container">
-    <el-col>
-      <el-input
-        placeholder="Filter"
-        v-model="filterText"
-        @change="filterHander"
-      ></el-input>
-    </el-col>
-    <el-col>
-      <el-row>
-        <el-col :span="4">
-          <el-tag
-            >Total ( {{ tableData.length }} / {{ rawData.length }} )</el-tag
+  <div class="container">
+    <el-row>
+      <el-col :span="4">
+        <el-select v-model="project" @change="loadData" placeholder="项目">
+          <el-option
+            v-for="item in projectList"
+            :key="item"
+            :label="item"
+            :value="item"
           >
-        </el-col>
-        <el-col :offset="2" :span="4">
-          <el-checkbox-group v-model="filterZH" size="mini">
-            <el-checkbox-button
-              v-for="zh in viewZHValueList"
-              :label="zh"
-              :key="zh"
-              >{{ zh }}</el-checkbox-button
-            >
-          </el-checkbox-group>
-          <!-- <el-select class="fgroup1" v-model="filterZH" placeholder="幢号">
-            <el-option
-              v-for="item in viewZHValueList"
-              :key="item.label"
-              :label="item.label"
-              :value="item.key"
-            >
-            </el-option>
-          </el-select> -->
-        </el-col>
-        <el-col :span="2">
-          <el-select class="fgroup1" v-model="filterDFL" placeholder="得房率">
-            <el-option
-              v-for="item in viewDFLValueList"
-              :key="item.label"
-              :label="item.label"
-              :value="item.key"
-            >
-            </el-option>
-          </el-select>
-        </el-col>
-        <el-col :offset="1" :span="2">
-          <el-checkbox v-model="isRoomlessCheck" border>无房户</el-checkbox>
-        </el-col>
-        <el-col :offset="1" :span="6">
-          <el-checkbox-group v-model="filterHx" size="small">
-            <el-checkbox-button
-              v-for="hx in viewHxList"
-              :label="hx"
-              :key="hx"
-              >{{ hx }}</el-checkbox-button
-            >
-          </el-checkbox-group>
-        </el-col>
-      </el-row>
-    </el-col>
-    <el-col :span="4"> </el-col>
-    <!-- <el-button @click="clearFilter">清除所有过滤器</el-button> -->
+          </el-option>
+        </el-select>
+      </el-col>
+      <el-col :span="16">
+        <el-input
+          placeholder="Filter"
+          v-model="filterText"
+          @change="filterHander"
+        ></el-input>
+      </el-col>
+    </el-row>
+    <el-row>
+      <el-col :span="4">
+        <el-tag
+          >Total ( {{ tableData.length }} / {{ listData.length }} )</el-tag
+        >
+      </el-col>
+      <el-col :offset="3" :span="3">
+        <el-select v-model="filterZH" multiple placeholder="幢号">
+          <el-option
+            v-for="item in viewZHValueList"
+            :key="item"
+            :label="item"
+            :value="item"
+          >
+          </el-option>
+        </el-select>
+      </el-col>
+      <el-col :span="3">
+        <el-select class="fgroup1" v-model="filterDFL" placeholder="得房率">
+          <el-option
+            v-for="item in viewDFLValueList"
+            :key="item.label"
+            :label="item.label"
+            :value="item.key"
+          >
+          </el-option>
+        </el-select>
+      </el-col>
+      <el-col :offset="1" :span="2">
+        <el-checkbox v-model="isRoomlessCheck" border>无房户</el-checkbox>
+      </el-col>
+      <el-col :offset="1" :span="6">
+        <el-checkbox-group v-model="filterHx" size="small">
+          <el-checkbox-button v-for="hx in viewHxList" :label="hx" :key="hx">{{
+            hx
+          }}</el-checkbox-button>
+        </el-checkbox-group>
+      </el-col>
+    </el-row>
     <el-table
       border
       cell-class-name="mycell"
@@ -94,11 +92,12 @@
       <el-table-column prop="楼栋" label="楼栋" min-width="100">
       </el-table-column>
     </el-table>
-  </el-row>
+  </div>
 </template>
 
 <script>
 import rawData from "../cooker/data/result.json";
+import axios from "axios";
 
 const getValues = (list, props) => {
   let ret = [];
@@ -110,22 +109,20 @@ const getValues = (list, props) => {
     };
   });
 };
-const viewDFLValueList = getValues(rawData, "得房率");
-const viewZHValueList0 = getValues(rawData, "幢号");
-viewZHValueList0.shift();
-const viewZHValueList = viewZHValueList0.map((d) => d.key);
 
 export default {
   data() {
     const viewHxList = ["4室2厅1厨2卫", "3室2厅1厨2卫"];
     return {
-      viewDFLValueList,
-      viewZHValueList,
-      viewHxList,
+      isListLoading: false,
       rawData,
-      zhCheckAll: true,
+      listData: [],
+      project: "春月金沙府",
+      projectList: ["春月金沙府", "江逸源境府"],
+      viewHxList,
+      //filters
       filterText: "",
-      filterZH: [].concat(viewZHValueList),
+      filterZH: [],
       filterDFL: "",
       filterHx: [].concat(viewHxList),
       isRoomlessCheck: false,
@@ -133,37 +130,65 @@ export default {
   },
   computed: {
     tableData: function () {
-      return this.rawData
-        .filter((d) => {
-          return this.isRoomlessCheck ? d.isRoomless : true;
-        })
-        // .filter((d) => {
-        //   return !this.filterZH || this.filterZH === d["幢号"];
-        // })
-        .filter((d) => {
-          return this.filterZH.includes(d["幢号"]);
-        })
-        .filter((d) => {
-          // return this.filterDFL === "all" || this.filterDFL === d["得房率"];
-          return !this.filterDFL || this.filterDFL === d["得房率"];
-        })
-        .filter((d) => {
-          return this.filterHx.includes(d["户型"]);
-        })
-        .filter((d) => {
-          const regtxt = this.filterText.replace(/\\/gi, "");
-          // const summaryStr = [
-          //   d["楼栋"],
-          //   d["无房户"],
-          //   d["户型"],
-          //   d["楼层"],
-          // ].join(" ");
-          const summaryStr = Object.values(d).join(" ");
-          return !this.filterText || new RegExp(regtxt, "i").test(summaryStr);
-        });
+      if (Array.isArray(this.listData)) {
+        return (
+          this.listData
+            .filter((d) => {
+              return this.isRoomlessCheck ? d.isRoomless : true;
+            })
+            // .filter((d) => {
+            //   return !this.filterZH || this.filterZH === d["幢号"];
+            // })
+            .filter((d) => {
+              return (
+                this.filterZH.length === 0 || this.filterZH.includes(d["幢号"])
+              );
+            })
+            .filter((d) => {
+              // return this.filterDFL === "all" || this.filterDFL === d["得房率"];
+              return !this.filterDFL || this.filterDFL === d["得房率"];
+            })
+            .filter((d) => {
+              return this.filterHx.includes(d["户型"]);
+            })
+            .filter((d) => {
+              const regtxt = this.filterText.replace(/\\/gi, "");
+              const summaryStr = Object.values(d).join(" ");
+              return (
+                !this.filterText || new RegExp(regtxt, "i").test(summaryStr)
+              );
+            })
+        );
+      } else {
+        return [];
+      }
+    },
+    viewDFLValueList: function () {
+      return getValues(this.listData, "得房率");
+    },
+    viewZHValueList: function () {
+      const viewZHValueList0 = getValues(this.listData, "幢号");
+      viewZHValueList0.shift();
+      return viewZHValueList0.map((d) => d.key);
     },
   },
   methods: {
+    loadData: function () {
+      if (!this.isListLoading && this.project) {
+        this.isListLoading = true;
+        axios
+          .get(`./${this.project}.merged.json`)
+          .then((res) => {
+            this.listData = res.data;
+          })
+          .finally(() => {
+            this.isListLoading = false;
+          });
+      } else {
+        console.warn("==disable pararall call");
+      }
+      // this.$forceUpdate();
+    },
     filterHander(value, row) {
       // return row["户型"] === value;
     },
@@ -173,6 +198,9 @@ export default {
     // filterHome(value, row) {
     //   return row["无房户"] === value;
     // },
+  },
+  mounted: function () {
+    this.loadData();
   },
 };
 </script>

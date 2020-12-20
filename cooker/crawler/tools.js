@@ -67,7 +67,7 @@ const mergeRs = (projectA, projectB) => {
   const roomAllName = `${__dirname}/${projectA.name}.${projectA.pageEnd}.json`
   const roomLessName = `${__dirname}/${projectB.name}.${projectB.pageEnd}.json`
 
-  const roomAll = require(roomAllName).map((d) => {
+  let roomAll = require(roomAllName).map((d) => {
     return {
       ld: d['楼栋'],
       fh: d['房号'],
@@ -90,8 +90,8 @@ const mergeRs = (projectA, projectB) => {
 
 
   roomAll.forEach((d) => {
-
-    d.zh = d.ld.match(new RegExp('^.*([0-9]+)幢'))[1] + '幢'
+    const getZH = (s) => s.split('幢')[0].match(new RegExp('(\\d+)'))[0]
+    d.zh = getZH(d.ld) + '幢'
     d.isRoomless = roomLess.findIndex((h) => {
       return h.zh == d.zh && h.fh == d.fh;
     }) > -1;
@@ -100,6 +100,25 @@ const mergeRs = (projectA, projectB) => {
     d.dfl = parseInt(100 * d.tnmj / d.jzmj) + '%'
 
   })
+  roomAll = roomAll.map((d) => {
+    return {
+      楼栋: d.ld,
+      房号: d.fh,
+      幢号: d.zh,
+      套内面积: d.tnmj,
+      建筑面积: d.jzmj,
+      得房率: d.dfl,
+      楼层: d.ce,
+      用途: d.yt,
+      总价: d.zj,
+      户型: d.hx,
+      销售状态: d.zt,
+      均价套内: d.jjtn,
+      均价建筑: d.jjjz,
+      无房户: d.isRoomless ? '是' : '否',
+      isRoomless: d.isRoomless,
+    };
+  });
   require('fs').writeFileSync(`${__dirname}/${projectA.name}.merged.json`, JSON.stringify(roomAll, null, 2))
   return roomAll;
 
