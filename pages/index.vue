@@ -26,19 +26,24 @@
           >Total ( {{ tableData.length }} / {{ listData.length }} )</el-tag
         >
       </el-col>
-      <el-col :offset="3" :span="3">
+      <el-col :offset="2" :span="2">
         <el-select v-model="filterZH" multiple placeholder="幢号">
           <el-option
             v-for="item in viewZHValueList"
-            :key="item"
-            :label="item"
-            :value="item"
+            :key="item.label"
+            :label="item.label"
+            :value="item.key"
           >
           </el-option>
         </el-select>
       </el-col>
-      <el-col :span="3">
-        <el-select class="fgroup1" v-model="filterDFL" placeholder="得房率">
+      <el-col :span="2">
+        <el-select
+          class="fgroup1"
+          v-model="filterDFL"
+          multiple
+          placeholder="得房率"
+        >
           <el-option
             v-for="item in viewDFLValueList"
             :key="item.label"
@@ -48,15 +53,50 @@
           </el-option>
         </el-select>
       </el-col>
-      <el-col :offset="1" :span="2">
+      <el-col :span="4">
+        <el-select
+          class="fgroup1"
+          v-model="filterHx"
+          multiple
+          placeholder="户型"
+        >
+          <el-option
+            v-for="item in viewHxList"
+            :key="item.label"
+            :label="item.label"
+            :value="item.key"
+          >
+          </el-option>
+        </el-select>
+      </el-col>
+      <el-col :offset="0" :span="2">
         <el-checkbox v-model="isRoomlessCheck" border>无房户</el-checkbox>
       </el-col>
-      <el-col :offset="1" :span="6">
-        <el-checkbox-group v-model="filterHx" size="small">
-          <el-checkbox-button v-for="hx in viewHxList" :label="hx" :key="hx">{{
-            hx
-          }}</el-checkbox-button>
-        </el-checkbox-group>
+
+      <el-col class="bar-item" :offset="0" :span="6">
+        <el-row>
+          <el-col :span="18">
+            <el-badge :value="ceTip" class="item">
+              <el-select v-model="filterCE" multiple placeholder="楼层">
+                <el-option
+                  v-for="item in viewCEList"
+                  :key="item.label"
+                  :label="item.label"
+                  :value="item.key"
+                >
+                </el-option>
+              </el-select>
+            </el-badge>
+          </el-col>
+          <el-col :span="3">
+            <el-switch
+              v-model="isCEInclude"
+              active-color="#13ce66"
+              inactive-color="#ff4949"
+            >
+            </el-switch>
+          </el-col>
+        </el-row>
       </el-col>
     </el-row>
     <el-table
@@ -70,7 +110,13 @@
       <el-table-column prop="房号" label="房号" width="80"> </el-table-column>
       <el-table-column prop="楼层" label="楼层" width="80" sortable>
       </el-table-column>
-      <el-table-column prop="总价" label="总价" sortable> </el-table-column>
+      <el-table-column
+        prop="总价"
+        label="总价"
+        sortable
+        :formatter="intFormatter"
+      >
+      </el-table-column>
       <el-table-column prop="均价套内" label="均价套内" sortable>
       </el-table-column>
       <el-table-column prop="均价建筑" label="均价建筑" sortable>
@@ -96,13 +142,15 @@
 </template>
 
 <script>
-import rawData from "../cooker/data/result.json";
 import axios from "axios";
 
-const getValues = (list, props) => {
+const getValues = (list, props, isIncludeEmpty = false) => {
   let ret = [];
-  ret = list.map((d) => d[props]);
-  return [""].concat(Array.from(new Set(ret))).map((d) => {
+  if (isIncludeEmpty) {
+    ret.push("");
+  }
+  const values = list.map((d) => d[props]);
+  return ret.concat(Array.from(new Set(values))).map((d) => {
     return {
       key: d,
       label: d || props,
@@ -112,20 +160,23 @@ const getValues = (list, props) => {
 
 export default {
   data() {
-    const viewHxList = ["4室2厅1厨2卫", "3室2厅1厨2卫"];
     return {
       isListLoading: false,
-      rawData,
       listData: [],
       project: "春月金沙府",
       projectList: ["春月金沙府", "江逸源境府"],
-      viewHxList,
+      viewCEList: [],
+      viewHxList: [],
+      viewDFLValueList: [],
+      viewZHValueList: [],
       //filters
       filterText: "",
       filterZH: [],
-      filterDFL: "",
-      filterHx: [].concat(viewHxList),
+      filterDFL: [],
+      filterCE: [],
+      filterHx: [],
       isRoomlessCheck: false,
+      isCEInclude: true,
     };
   },
   computed: {
@@ -145,11 +196,29 @@ export default {
               );
             })
             .filter((d) => {
-              // return this.filterDFL === "all" || this.filterDFL === d["得房率"];
-              return !this.filterDFL || this.filterDFL === d["得房率"];
+              return (
+                this.filterDFL.length === 0 ||
+                this.filterDFL.includes(d["得房率"])
+              );
             })
             .filter((d) => {
-              return this.filterHx.includes(d["户型"]);
+              // console.log("====" + this.isCEInclude);
+              let ret = true;
+              if (this.filterCE.length === 0) {
+                ret = true;
+              } else {
+                if (this.isCEInclude) {
+                  ret = this.filterCE.includes(d["楼层"]);
+                } else {
+                  ret = !this.filterCE.includes(d["楼层"]);
+                }
+              }
+              return ret;
+            })
+            .filter((d) => {
+              return (
+                this.filterHx.length === 0 || this.filterHx.includes(d["户型"])
+              );
             })
             .filter((d) => {
               const regtxt = this.filterText.replace(/\\/gi, "");
@@ -163,13 +232,8 @@ export default {
         return [];
       }
     },
-    viewDFLValueList: function () {
-      return getValues(this.listData, "得房率");
-    },
-    viewZHValueList: function () {
-      const viewZHValueList0 = getValues(this.listData, "幢号");
-      viewZHValueList0.shift();
-      return viewZHValueList0.map((d) => d.key);
+    ceTip: function () {
+      return this.isCEInclude ? "包括" : "排除";
     },
   },
   methods: {
@@ -177,9 +241,20 @@ export default {
       if (!this.isListLoading && this.project) {
         this.isListLoading = true;
         axios
-          .get(`./${this.project}.merged.json`)
+          .get(`./${this.project}.merged.json?v=1`)
           .then((res) => {
-            this.listData = res.data;
+            this.listData = res.data.map((d) => {
+              const ret = { ...d };
+              ret["楼层"] = parseInt(d["楼层"]);
+              ret["总价"] = parseInt(d["总价"]);
+              return ret;
+            });
+            this.viewDFLValueList = getValues(this.listData, "得房率");
+            this.viewZHValueList = getValues(this.listData, "幢号");
+            this.viewHxList = getValues(this.listData, "户型");
+            this.viewCEList = getValues(this.listData, "楼层").sort(
+              (a, b) => a.key - b.key
+            );
           })
           .finally(() => {
             this.isListLoading = false;
@@ -192,6 +267,13 @@ export default {
     filterHander(value, row) {
       // return row["户型"] === value;
     },
+    intFormatter(row, column) {
+      // console.log(row, column);
+      return parseInt(row[column.property]);
+    },
+    // intSorter(a, b) {
+    //   return  parseInt(a) - parseInt(b);
+    // },
     // filterType(value, row) {
     //   return row["户型"] === value;
     // },
@@ -217,6 +299,10 @@ export default {
 }
 .fgroup1 {
   margin: 0 0.25rem;
+}
+
+.bar-item {
+  margin-left: 1rem;
 }
 
 @media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (-webkit-min-device-pixel-ratio: 2) {

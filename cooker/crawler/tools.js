@@ -71,8 +71,8 @@ const mergeRs = (projectA, projectB) => {
     return {
       ld: d['楼栋'],
       fh: d['房号'],
-      tnmj: d['套内面积'].replace(' ㎡', ''),
-      jzmj: d['建筑面积'].replace(' ㎡', ''),
+      tnmj: parseInt(d['套内面积'].replace(' ㎡', '')),
+      jzmj: parseInt(d['建筑面积'].replace(' ㎡', '')),
       ce: d['所在层'],
       yt: d['规划用途'],
       zj: d['备案总价(元)'],
@@ -91,9 +91,10 @@ const mergeRs = (projectA, projectB) => {
 
   roomAll.forEach((d) => {
     const getZH = (s) => s.split('幢')[0].match(new RegExp('(\\d+)'))[0]
-    d.zh = getZH(d.ld) + '幢'
+    d.zh = getZH(d.ld)
     d.isRoomless = roomLess.findIndex((h) => {
-      return h.zh == d.zh && h.fh == d.fh;
+      const roomLessZh = h.zh.replace('幢', '')
+      return roomLessZh === d.zh && h.fh == d.fh;
     }) > -1;
     d.jjtn = Math.round(d.zj / d.tnmj).toFixed(0)
     d.jjjz = Math.round(d.zj / d.jzmj).toFixed(0)
