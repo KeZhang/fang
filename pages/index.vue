@@ -75,22 +75,27 @@
 
       <el-col class="bar-item" :offset="0" :span="6">
         <el-switch
-              v-model="isCEInclude"
-              active-color="#13ce66"
-              inactive-color="#ff4949"
+          v-model="isCEInclude"
+          active-color="#13ce66"
+          inactive-color="#ff4949"
+        >
+        </el-switch>
+        <el-badge :value="ceTip" class="item-ceng">
+          <el-select
+            size="small"
+            v-model="filterCE"
+            multiple
+            placeholder="楼层"
+          >
+            <el-option
+              v-for="item in viewCEList"
+              :key="item.label"
+              :label="item.label"
+              :value="item.key"
             >
-            </el-switch>
-         <el-badge :value="ceTip" class="item-ceng">
-              <el-select size="small" v-model="filterCE" multiple placeholder="楼层">
-                <el-option
-                  v-for="item in viewCEList"
-                  :key="item.label"
-                  :label="item.label"
-                  :value="item.key"
-                >
-                </el-option>
-              </el-select>
-            </el-badge>
+            </el-option>
+          </el-select>
+        </el-badge>
       </el-col>
     </el-row>
     <el-table
@@ -137,6 +142,7 @@
 
 <script>
 import axios from "axios";
+const projectList = ["春月金沙府", "江逸源境府", "春熙潮鸣府"];
 
 const getValues = (list, props, isIncludeEmpty = false) => {
   let ret = [];
@@ -157,8 +163,8 @@ export default {
     return {
       isListLoading: false,
       listData: [],
-      project: "春月金沙府",
-      projectList: ["春月金沙府", "江逸源境府"],
+      project: projectList[0],
+      projectList,
       viewCEList: [],
       viewHxList: [],
       viewDFLValueList: [],
